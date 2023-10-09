@@ -1,71 +1,44 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from matplotlib.path import Path
+from create_scene import load_scene, plot_polygons
 
-#this isnt right but good start
+def check_collision(polygons):
+    collision_flags = [False] * len(polygons)
+    for i in range(len(polygons)):
+        for j in range(len(polygons)):
+            if i != j:
+                path = Path(polygons[j])
+                for point in polygons[i]:
+                    if path.contains_point(point):
+                        collision_flags[i] = True
+                        collision_flags[j] = True
+    return collision_flags
 
-def dot(v, w):
-    return v[0] * w[0] + v[1] * w[1]
+def plot_colliding_polygons(polygons):
+    fig, ax = plt.subplots(dpi=100)
+    ax.set_xlim((0, 2))
+    ax.set_ylim((0, 2))
+    ax.set_aspect('equal', 'box')
+    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
-def normalize(v):
-    norm = np.linalg.norm(v)
-    if norm == 0:
-       return v
-    return v / norm
+    used_colors = set()
 
-def project_polygon(axis, polygon):
-    """Project the polygon on the given axis."""
-    min_proj = float('inf')
-    max_proj = float('-inf')
-    
-    for vertex in polygon:
-        proj = dot(vertex, axis)
-        min_proj = min(min_proj, proj)
-        max_proj = max(max_proj, proj)
-        
-    return (min_proj, max_proj)
+    collision_flags = check_collision(polygons)
 
-def is_separating_axis(axis, poly1, poly2):
-    """Check if the axis is a separating axis."""
-    proj1 = project_polygon(axis, poly1)
-    proj2 = project_polygon(axis, poly2)
-    
-    return proj1[1] < proj2[0] or proj2[1] < proj1[0]
+    for i, polygon in enumerate(polygons):
+        color = 'red' if collision_flags[i] else 'black'
+        polygon_patch = patches.Polygon(polygon, closed=True, fill=True, edgecolor=color, alpha=0.6)
+        ax.add_patch(polygon_patch)
 
-def check_collision(poly1, poly2):
-    edges = []
-    for i in range(len(poly1)):
-        edges.append((poly1[i], poly1[(i+1)%len(poly1)]))
-    for i in range(len(poly2)):
-        edges.append((poly2[i], poly2[(i+1)%len(poly2)]))
-
-    for edge in edges:
-        axis = normalize(np.array([edge[1][1] - edge[0][1], edge[0][0] - edge[1][0]]))
-        if is_separating_axis(axis, poly1, poly2):
-            return False
-
-    return True
-
-def plot_polygons(poly1, poly2):
-    fig, ax = plt.subplots()
-    poly1_patch = patches.Polygon(poly1, closed=True, edgecolor='blue', facecolor='none')
-    poly2_patch = patches.Polygon(poly2, closed=True, edgecolor='red', facecolor='none')
-    ax.add_patch(poly1_patch)
-    ax.add_patch(poly2_patch)
-    
-    plt.xlim(-10, 10)
-    plt.ylim(-10, 10)
-    plt.grid()
-    plt.gca().set_aspect('equal', adjustable='box')
     plt.show()
 
-# Example:
-poly1 = [[0, 0], [4, 0], [2, 4]]
-poly2 = [[3, 1], [7, 1], [5, 5]]
+if __name__ == "__main__":
+    filename = input("Enter the filename to load the scene from (default is 'scene.npy'): ") or 'scene.npy'
+    polygons = load_scene(filename, allow_pickle=True)
+    #for TAs
+    #polygons = np.load(’collision_checking_polygons.npy’, allow_pickle=True)
+    plot_colliding_polygons(polygons)
 
-if check_collision(poly1, poly2):
-    print("Polygons collide!")
-else:
-    print("Polygons do not collide!")
 
-plot_polygons(poly1, poly2)
