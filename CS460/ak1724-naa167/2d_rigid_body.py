@@ -2,17 +2,44 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.path import Path
-#from create_scene import load_scene, plot_polygons
+from create_scene import load_scene, plot_polygons
 
+polygons = np.load('scene.npy', allow_pickle=True)
+
+def check_freespace(polygons, rect_vertices):
+    #check_collisoin_path = [False] * len(polygons)
+    for i in range(len(polygons)):
+        path = Path(rect_hull)
+        for point in polygons[i]:
+            if path.contains_point(point):
+                return False
+    return True 
+
+def get_rect_vertices(x1, y1):
+    x2, y2 = x1, y1 + 0.2
+    x3, y3 = x1 + 0.1, y2
+    x4, y4 = x3, y1
+    rect_vertices = [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
+    return rect_vertices  
+
+x1 = np.random.uniform(0.1, 2.0)
+y1 = np.random.uniform(0.1, 2.0)
+rect_vertices = get_rect_vertices(x1, y1)
+rect_hull = ConvexHull(rect_vertices)
 fig, ax = plt.subplots(figsize=(6, 6))
 ax.set_xlim(0.0, 2.0)
 ax.set_ylim(0.0, 2.0)
 ax.set_aspect('equal', 'box')
 
-
-rect_vertices = np.array([[0.1, 0.1], [0.1, 0.3], [0.2, 0.3], [0.2, 0.1]])
+while not(check_freespace(polygons, rect_vertices)):
+    x1 = np.random.uniform(0.1, 2.0)
+    y1 = np.random.uniform(0.1, 2.0)
+    rect_vertices = get_rect_vertices(x1, y1)
+    
+polygons.append(rect_hull.points[rect_hull.vertices])
 rect_patch = patches.Polygon(rect_vertices, closed=True, fill=True)
 ax.add_patch(rect_patch)
+
 
 def rotate(vertices, angle_degrees, center_point):
     angle_rad = np.deg2rad(angle_degrees)
@@ -43,4 +70,5 @@ def on_key(event):
     fig.canvas.draw()
 
 fig.canvas.mpl_connect('key_press_event', on_key)
+plot_polygons(polygons)
 plt.show()
