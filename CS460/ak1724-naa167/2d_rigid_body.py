@@ -70,5 +70,5 @@ def on_key(event):
     fig.canvas.draw()
 
 fig.canvas.mpl_connect('key_press_event', on_key)
-plot_polygons(polygons)
+create_scene.plot_polygons(polygons)
 plt.show()
