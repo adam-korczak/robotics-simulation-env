@@ -5,9 +5,6 @@ from matplotlib.patches import Rectangle
 
 map_polygons = np.load("arm_polygons.npy", allow_pickle=True)
 class NLinkArm(object):
-    """
-    Class for controlling and plotting a planar arm with an arbitrary number of links.
-    """
 
     def __init__(self, link_lengths, joint_angles, joint_radius, link_width):
         self.n_links = len(link_lengths)
