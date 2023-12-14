@@ -24,8 +24,6 @@ def apply_motion_model(particle, control):
     return [x_new, y_new, theta_new]
 
 def calculate_weight(particle, sensor_reading, map_landmarks):
-    # Placeholder function for calculating weights
-    # Implement the actual sensor model for your scenario
     return np.random.random()
 
 def particle_filter(particles, map_landmarks, sensor_reading):
@@ -88,7 +86,7 @@ def main():
     np.save(args.estimates, np.array(estimates))
 
     plt.show()
-    # Optionally, save the animation using anim.save('animation.mp4')
+
 
 if __name__ == "__main__":
     main()
