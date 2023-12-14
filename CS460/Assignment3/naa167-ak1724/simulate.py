@@ -53,7 +53,7 @@ def actuation_noise(initial_pose, controls, linear_noise, angular_noise,act_cont
     dt = 0.1
 
     for i in range(num_steps):
-        v_planned, omega_planned = controls[i][0], controls[i][0]
+        v_planned, omega_planned = controls[i][0], controls[i][1]
 
         v_noisy = np.clip(v_planned + np.random.normal(0, linear_noise),v_min, v_max)
         omega_noisy = np.clip(omega_planned + np.random.normal(0, angular_noise), omega_min,omega_max)
