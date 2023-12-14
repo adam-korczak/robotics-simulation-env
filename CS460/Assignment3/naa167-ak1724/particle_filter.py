@@ -2,7 +2,6 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import simulate  # Assuming this is the name of your first script
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Particle Filter for Robot Localization')
@@ -27,15 +26,19 @@ def apply_motion_model(particle, control):
 
 def calculate_weight(particle, sensor_reading, map_landmarks):
     # Calculate particle weight based on sensor reading and map landmarks
+    # Placeholder implementation - replace with your sensor model
     return np.random.random()
 
 def particle_filter(particles, map_landmarks, sensor_reading):
+    # Apply motion model to each particle
     control = sensor_reading[:2]  # Assuming control data is in sensor_reading
     particles = np.array([apply_motion_model(p, control) for p in particles])
 
+    # Update particle weights based on sensor readings
     weights = np.array([calculate_weight(p, sensor_reading, map_landmarks) for p in particles])
     weights /= np.sum(weights)
 
+    # Resample particles based on weights
     indices = np.random.choice(range(len(particles)), size=len(particles), p=weights)
     particles = particles[indices]
 
@@ -46,22 +49,23 @@ def update_estimates(particles, weights):
     return mean_estimate
 
 def plot_map(ax, map_landmarks):
-    ax.scatter(map_landmarks[:, 0], map_landmarks[:, 1], marker='o', color='green', label='Landmarks')
+    ax.scatter(map_landmarks[:, 0], map_landmarks[:, 1], marker='o', color='blue', label='Landmarks')
 
 def plot_particles(ax, particles, weights):
-    ax.scatter(particles[:, 0], particles[:, 1], alpha=0.5, color='blue', label='Particles')
+    ax.scatter(particles[:, 0], particles[:, 1], alpha=0.5, color='black', label='Particles')
 
 def animate(i, particles, weights, ax, map_landmarks, sensor_readings):
     ax.clear()
     plot_map(ax, map_landmarks)
     plot_particles(ax, particles, weights)
+    # Additional elements for visualization can be added here
 
 def main():
     args = parse_args()
 
     map_landmarks = np.load(args.map)
     sensor_readings = np.load(args.sensing)
-    initial_pose = sensor_readings[0]
+    initial_pose = sensor_readings[0]  # Assuming initial pose is the first entry in the file
     particles = initialize_particles(initial_pose, args.num_particles)
 
     fig, ax = plt.subplots()
@@ -78,7 +82,7 @@ def main():
     np.save(args.estimates, np.array(estimates))
 
     plt.show()
-    # anim.save('animation.mp4')
+    # Optionally, save the animation using anim.save('animation.mp4')
 
 if __name__ == "__main__":
     main()
