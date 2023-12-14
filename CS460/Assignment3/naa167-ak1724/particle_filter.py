@@ -16,7 +16,6 @@ def initialize_particles(initial_pose, num_particles):
     return particles
 
 def apply_motion_model(particle, control):
-    # Simple motion model: update particle based on control input
     x, y, theta = particle
     v, omega = control
     x_new = x + v * np.cos(theta)
@@ -25,20 +24,17 @@ def apply_motion_model(particle, control):
     return [x_new, y_new, theta_new]
 
 def calculate_weight(particle, sensor_reading, map_landmarks):
-    # Calculate particle weight based on sensor reading and map landmarks
-    # Placeholder implementation - replace with your sensor model
+    # Placeholder function for calculating weights
+    # Implement the actual sensor model for your scenario
     return np.random.random()
 
 def particle_filter(particles, map_landmarks, sensor_reading):
-    # Apply motion model to each particle
     control = sensor_reading[:2]  # Assuming control data is in sensor_reading
     particles = np.array([apply_motion_model(p, control) for p in particles])
 
-    # Update particle weights based on sensor readings
     weights = np.array([calculate_weight(p, sensor_reading, map_landmarks) for p in particles])
     weights /= np.sum(weights)
 
-    # Resample particles based on weights
     indices = np.random.choice(range(len(particles)), size=len(particles), p=weights)
     particles = particles[indices]
 
@@ -54,18 +50,28 @@ def plot_map(ax, map_landmarks):
 def plot_particles(ax, particles, weights):
     ax.scatter(particles[:, 0], particles[:, 1], alpha=0.5, color='black', label='Particles')
 
+def plot_odometry(ax, sensor_readings, current_step):
+    odometry_positions = sensor_readings[:current_step, :2]
+    ax.plot(odometry_positions[:, 0], odometry_positions[:, 1], color='red', label='Odometry')
+
+def plot_noisy_observations(ax, sensor_readings, current_step):
+    noisy_obs = sensor_readings[current_step][3:]  # Adjust based on your data format
+    for i in range(0, len(noisy_obs), 2):
+        ax.scatter(noisy_obs[i], noisy_obs[i+1], marker='x', color='red', label='Noisy Observations')
+
 def animate(i, particles, weights, ax, map_landmarks, sensor_readings):
     ax.clear()
     plot_map(ax, map_landmarks)
     plot_particles(ax, particles, weights)
-    # Additional elements for visualization can be added here
+    plot_odometry(ax, sensor_readings, i)
+    plot_noisy_observations(ax, sensor_readings, i)
 
 def main():
     args = parse_args()
 
     map_landmarks = np.load(args.map)
     sensor_readings = np.load(args.sensing)
-    initial_pose = sensor_readings[0]  # Assuming initial pose is the first entry in the file
+    initial_pose = sensor_readings[0]
     particles = initialize_particles(initial_pose, args.num_particles)
 
     fig, ax = plt.subplots()
